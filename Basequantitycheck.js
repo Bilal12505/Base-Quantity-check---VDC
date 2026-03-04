@@ -104,13 +104,13 @@ class InputField {
 // STEP 5️⃣: Core logic — check base quantities
 // ================================================
 async function checkBaseQuantitiesDynamic(ifcPartial, properties) {
-    const allElements = await desiteAPI.getAllElements("geometry");
+    const allElements = await vdcApp.getAllElements("geometry");
     const filteredElements = [];
 
     for (const element of allElements) {
     // Get both properties
-    const type = await desiteAPI.getPropertyValue(element, "ifcType", "xs:string");
-    const typeObject = await desiteAPI.getPropertyValue(element, "ifcTypeObject", "xs:string");
+    const type = await vdcApp.getPropertyValue(element, "ifcType", "xs:string");
+    const typeObject = await vdcApp.getPropertyValue(element, "ifcTypeObject", "xs:string");
 
     // Convert to lowercase for comparison
     const typeLower = type ? type.toLowerCase() : "";
@@ -126,20 +126,20 @@ async function checkBaseQuantitiesDynamic(ifcPartial, properties) {
         return "noElements";
     }
 
-    await desiteAPI.showElementsOnly(filteredElements);
+    await vdcApp.showElementsOnly(filteredElements);
 
     const selSetsWithElements = new Set();
     const elementIdsBySet = {};
 
     // Check all elements
 for (const element of filteredElements) {
-    const id = await desiteAPI.idListToStr(element);
+    const id = await vdcApp.idListToStr(element);
 
     for (const prop of properties) {
         let value;
         // Try all possible keys until a value is found
         for (const key of prop.keys) {
-            value = await desiteAPI.getPropertyValue(element, key, "xs:double");
+            value = await vdcApp.getPropertyValue(element, key, "xs:double");
             if (value !== null && value !== undefined) break;
         }
 
@@ -168,13 +168,14 @@ for (const element of filteredElements) {
     // Create selection sets and add IDs in bulk
     for (const [setName, ids] of Object.entries(elementIdsBySet)) {
         if (ids.length > 0) {
-            const selSet = await desiteAPI.createSelectionSet(setName);
-            await desiteAPI.addToSelectionSetGeometry(selSet, ids.join(";"));
+            const selSet = await vdcApp.createSelectionSet(setName);
+            await vdcApp.addToSelectionSetGeometry(selSet, ids.join(";"));
         }
     }
 
     return "issuesFound";
 }
+
 
 
 
